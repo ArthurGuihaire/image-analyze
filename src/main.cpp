@@ -1,4 +1,5 @@
 #include "ImageAnalyzePCH.hpp"
+#include "constants.hpp"
 #include "fileManager.hpp"
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/View.hpp>
@@ -25,9 +26,7 @@ int main() {
     }
     
     //Create render window
-    sf::RenderWindow window = sf::RenderWindow(sf::VideoMode(sf::Vector2u(800, 600)), "Image Analyzer", sf::Style::Resize | sf::Style::Close);
-
-    std::cout << "created window? " << std::endl;
+    sf::RenderWindow window = sf::RenderWindow(sf::VideoMode(sf::Vector2u(startingWidth, startingHeight)), "Image Analyzer", sf::Style::Resize | sf::Style::Close);
 
     window.setVerticalSyncEnabled(true); // Enable vsync
 

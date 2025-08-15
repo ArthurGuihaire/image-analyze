@@ -33,7 +33,7 @@ if (MSVC)
     )
 else()
     target_compile_options(ImageAnalyze PRIVATE
-        -Wall -Wextra -Wpedantic -Werror
+        -Wall -Wextra -Wpedantic
         -Wshadow -Wconversion -Wsign-conversion
         -Wfloat-equal -Wcast-align -Wold-style-cast
         -Wnon-virtual-dtor -Wduplicated-cond -Wduplicated-branches

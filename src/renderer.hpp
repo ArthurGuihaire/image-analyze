@@ -13,7 +13,7 @@ class Renderer {
         bool mouseDown;
         bool shiftPressed;
         bool mouseDragged;
-        bool lineVisible;
+        char numSetPoints;
     public:
         Renderer(sf::RenderWindow& window, const std::filesystem::path& texturePath);
         void renderFrame();
