@@ -49,6 +49,12 @@ target_link_libraries(ImageAnalyze PRIVATE
     SFML::System
 )
 
+# Copy font into build
+configure_file(${CMAKE_SOURCE_DIR}/roboto.ttf
+               ${CMAKE_BINARY_DIR}/roboto.ttf
+               COPYONLY)
+
+
 # (Optional) nice-to-haves:
 # enable IPO/LTO in Release if available
 include(CheckIPOSupported)

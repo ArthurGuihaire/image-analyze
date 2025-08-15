@@ -24,13 +24,15 @@ int main() {
     else {
         imagePath = std::filesystem::path(filepath);
     }
+
+    const std::filesystem::path& fontPath(std::string(getenv("HOME")) + "/projects/image-analyze/build/roboto.ttf");
     
     //Create render window
     sf::RenderWindow window = sf::RenderWindow(sf::VideoMode(sf::Vector2u(startingWidth, startingHeight)), "Image Analyzer", sf::Style::Resize | sf::Style::Close);
 
     window.setVerticalSyncEnabled(true); // Enable vsync
 
-    Renderer renderer(window, imagePath);
+    Renderer renderer(window, imagePath, fontPath);
 
     while (window.isOpen()) {
         renderer.renderFrame();

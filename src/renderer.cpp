@@ -1,9 +1,11 @@
 #include "renderer.hpp"
 #include "constants.hpp"
+#include <SFML/Window/WindowEnums.hpp>
 #include <cmath>
+#include <string>
 
-Renderer::Renderer(sf::RenderWindow& window, const std::filesystem::path& texturePath)
-    : windowReference(window), textureSprite(texture), line(sf::PrimitiveType::Lines, 2), windowCenter(sf::Vector2i(window.getSize()) / 2), mouseDown(false), shiftPressed(false), numSetPoints(0)
+Renderer::Renderer(sf::RenderWindow& window, const std::filesystem::path& texturePath, const std::filesystem::path& fontPath)
+    : windowReference(window), textureSprite(texture), line(sf::PrimitiveType::LineStrip, 5), infoText(infoTextFont), infoTextFont(fontPath), windowCenter(sf::Vector2i(window.getSize()) / 2), mouseDown(false), shiftPressed(false), numSetPoints(0)
 {
     screenView = sf::View(sf::Vector2f(windowCenter), sf::Vector2f(startingWidth, startingHeight));
     worldView = sf::View(sf::Vector2f(windowCenter), sf::Vector2f(startingWidth, startingHeight));
@@ -16,8 +18,9 @@ Renderer::Renderer(sf::RenderWindow& window, const std::filesystem::path& textur
     windowCenter = sf::Vector2f(windowReference.getSize()) / 2.0f;
     textureSprite.setTexture(texture, true);
     currentZoom = 1.0f;
-    line[0].color = sf::Color::Red;
-    line[1].color = sf::Color::Red;
+    for (unsigned char i = 0; i < 5; i++) {
+        line[i].color = sf::Color::Red;
+    }
 }
 
 void Renderer::renderFrame() {
@@ -25,10 +28,15 @@ void Renderer::renderFrame() {
         handleInput(*eventPointer);
     }
     windowReference.clear();
+
     windowReference.setView(worldView);
     windowReference.draw(textureSprite);
     if (numSetPoints == 2 || numSetPoints == 3)
         windowReference.draw(line);
+
+    windowReference.setView(screenView);
+    windowReference.draw(infoText);
+
     windowReference.display();
 }
 
@@ -44,8 +52,10 @@ void Renderer::changeZoom(const sf::Vector2i& currentMousePosition, const float 
 void Renderer::handleInput(const sf::Event& event) {
     if (const auto mouseMove = event.getIf<sf::Event::MouseMoved>()) {
         if (shiftPressed && (numSetPoints == 1 || numSetPoints == 2)) {
-            line[1].position = windowReference.mapPixelToCoords(mouseMove->position, worldView);
+            line[2].position = windowReference.mapPixelToCoords(mouseMove->position, worldView);
             numSetPoints = 2;
+            line[1].position = sf::Vector2f(line[2].position.x, line[0].position.y);
+            line[3].position = sf::Vector2f(line[0].position.x, line[2].position.y);
         }
         else if (mouseDown) {
             worldView.move(sf::Vector2f(mousePosition - (mouseMove->position)) * currentZoom);
@@ -63,6 +73,7 @@ void Renderer::handleInput(const sf::Event& event) {
             if (shiftPressed) {
                 if (numSetPoints == 0 || numSetPoints == 3) {
                     line[0].position = windowReference.mapPixelToCoords(mouseClicked->position, worldView);
+                    line[4].position = line[0].position;
                     numSetPoints = 1;
                 }
             }
@@ -74,13 +85,19 @@ void Renderer::handleInput(const sf::Event& event) {
             if (!shiftPressed) {
                 if (!mouseDragged) {
                     sf::Vector2f worldPosition = windowReference.mapPixelToCoords(MouseReleased->position, worldView);
-                    std::cout << "Mouse clicked at pixel position " << truncf(worldPosition.x) << ", " << truncf(worldPosition.y) << std::endl;
+                    std::string infoTextString = std::string("Mouse clicked at pixel position ") + std::to_string(static_cast<int>(worldPosition.x)) + ", " + std::to_string(static_cast<int>(worldPosition.y));
+                    infoText.setString(infoTextString);
+                    std::cout << infoTextString << std::endl;
                 }
             }
             else if (numSetPoints == 2) {
-                line[1].position = windowReference.mapPixelToCoords(MouseReleased->position);
+                line[2].position = windowReference.mapPixelToCoords(MouseReleased->position, worldView);
                 numSetPoints = 3;
-                std::cout << "Line goes from " << truncf(line[0].position.x) << ", " << truncf(line[0].position.y) << " to " << truncf(line[1].position.x) << ", " << truncf(line[1].position.y) << " so dimensions are " << std::abs((truncf(line[1].position.x)) - truncf(line[0].position.x)) << ", " << std::abs(truncf(line[1].position.y) - truncf(line[0].position.y)) << std::endl;
+                line[1].position = sf::Vector2f(line[2].position.x, line[0].position.y);
+                line[3].position = sf::Vector2f(line[0].position.x, line[2].position.y);
+                std::string infoTextString = std::string("Line goes from ") + std::to_string(static_cast<int>(line[0].position.x)) + ", " + std::to_string(static_cast<int>(line[0].position.y)) + " to " + std::to_string(static_cast<int>(line[2].position.x)) + ", " + std::to_string(static_cast<int>(line[2].position.y)) + " so dimensions are " + std::to_string(std::abs((static_cast<int>(line[2].position.x)) - static_cast<int>(line[0].position.x))) + ", " + std::to_string(std::abs(static_cast<int>(line[2].position.y) - static_cast<int>(line[0].position.y)));
+                infoText.setString(infoTextString);
+                std::cout << infoTextString << std::endl;
             }
         }
     }
@@ -95,9 +112,11 @@ void Renderer::handleInput(const sf::Event& event) {
     }
     else if(const auto Resized = event.getIf<sf::Event::Resized>()) {
         worldView.setSize(sf::Vector2f(Resized->size));
-        screenView.setSize(sf::Vector2f(Resized->size));
         worldView.zoom(currentZoom);
+        std::cout << "changed default view" << std::endl;
         windowCenter = sf::Vector2f(windowReference.getSize()) / 2.0f;
+        screenView.setSize(sf::Vector2f(windowReference.getSize()));
+        screenView.setCenter(windowCenter);
     }
     else if (event.is<sf::Event::Closed>())
         windowReference.close();
