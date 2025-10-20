@@ -1,4 +1,3 @@
-#include "ImageAnalyzePCH.hpp"
 #include "constants.hpp"
 #include "fileManager.hpp"
 #include <SFML/Graphics/Rect.hpp>
@@ -7,12 +6,17 @@
 #include <SFML/System/Vector2.hpp>
 #include "renderer.hpp"
 
-int main() {
+int main(int argc, char* argv[]) {
     // Init
-    std::cout << "File path of image to load, or empty to load latest screenshot: ";
     std::string filepath;
-    std::getline(std::cin, filepath);
-    std::cout << "\n";
+    if (argc == 1) {
+        std::cout << "File path of image to load, or empty to load latest screenshot: ";
+        std::getline(std::cin, filepath);
+        std::cout << "\n";
+    }
+    else {
+        filepath = argv[1];
+    }
 
     std::filesystem::path imagePath;
 

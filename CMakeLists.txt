@@ -1,13 +1,15 @@
-cmake_minimum_required(VERSION 3.16)  # 3.16+ is comfy; bump if you need newer features
-project(ImageAnalyze LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.16)
+project(ImageAnalyze VERSION 1.0.0 LANGUAGES CXX)
 
-# C++ standard (pick what you want)
+# C++ standard
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-# or: target_compile_features(ImageAnalyze PRIVATE cxx_std_20) after add_executable
 
-# SFML 3: use CONFIG mode + PascalCase components/targets
+# Standard install dirs like bin/, lib/, share/, etc.
+include(GNUInstallDirs)
+
+# SFML 3
 find_package(SFML 3 REQUIRED CONFIG COMPONENTS Graphics Window System)
 
 add_executable(ImageAnalyze
@@ -18,9 +20,6 @@ add_executable(ImageAnalyze
     src/fileManager.cpp
 )
 
-# (Optional) per-target standard instead of global:
-# target_compile_features(ImageAnalyze PRIVATE cxx_std_20)
-
 # PCH
 target_precompile_headers(ImageAnalyze PRIVATE src/ImageAnalyzePCH.hpp)
 
@@ -28,8 +27,8 @@ target_precompile_headers(ImageAnalyze PRIVATE src/ImageAnalyzePCH.hpp)
 if (MSVC)
     target_compile_options(ImageAnalyze PRIVATE
         /W4
-        /permissive-         # be strict about standard conformance
-        /external:W0         # don’t spam warnings from external headers
+        /permissive-
+        /external:W0
     )
 else()
     target_compile_options(ImageAnalyze PRIVATE
@@ -42,29 +41,49 @@ else()
     )
 endif()
 
-# Link SFML 3 imported targets (PascalCase)
+# Link SFML 3 imported targets
 target_link_libraries(ImageAnalyze PRIVATE
     SFML::Graphics
     SFML::Window
     SFML::System
 )
 
-# Copy font into build
+# ----- Runtime resource during build -----
+# Keep your existing behavior for in-tree runs
 configure_file(${CMAKE_SOURCE_DIR}/roboto.ttf
                ${CMAKE_BINARY_DIR}/roboto.ttf
                COPYONLY)
 
+# ----- Install rules -----
+# Install the executable to bin/
+install(TARGETS ImageAnalyze
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
 
-# (Optional) nice-to-haves:
-# enable IPO/LTO in Release if available
+# Install the font
+install(FILES ${CMAKE_SOURCE_DIR}/roboto.ttf
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME})
+
+# ----- Enable IPO/LTO in Release if available -----
 include(CheckIPOSupported)
 check_ipo_supported(RESULT ipo_ok OUTPUT ipo_msg)
 if (ipo_ok)
     set_property(TARGET ImageAnalyze PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
 endif()
 
-# (Optional) AddressSanitizer in Debug on GCC/Clang
-if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT MSVC)
-    target_compile_options(ImageAnalyze PRIVATE -fsanitize=address,undefined -fno-omit-frame-pointer)
-    target_link_options(ImageAnalyze PRIVATE -fsanitize=address,undefined)
-endif()
+# ----- Optional: 'uninstall' target -----
+# Allows:  make uninstall   (from the build dir)
+add_custom_target(uninstall
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
+)
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
+"if(NOT EXISTS \"${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt\")\n"
+"  message(FATAL_ERROR \"No install manifest\")\n"
+"endif()\n"
+"file(READ \"${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt\" files)\n"
+"string(REPLACE \"\\n\" \";\" files \"${files}\")\n"
+"foreach(file ${files})\n"
+"  message(STATUS \"Removing ${file}\")\n"
+"  file(REMOVE_RECURSE \"${file}\")\n"
+"endforeach()\n"
+)
