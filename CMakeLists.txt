@@ -1,37 +1,28 @@
 cmake_minimum_required(VERSION 3.16)
-project(ImageAnalyze VERSION 1.0.0 LANGUAGES CXX)
+project(image-analyze VERSION 1.1.0 LANGUAGES CXX)
 
-# C++ standard
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Standard install dirs like bin/, lib/, share/, etc.
 include(GNUInstallDirs)
 
-# SFML 3
+# ---- Dependencies ----
 find_package(SFML 3 REQUIRED CONFIG COMPONENTS Graphics Window System)
 
-add_executable(ImageAnalyze
+add_executable(image-analyze
     src/main.cpp
     src/renderer.hpp
     src/renderer.cpp
     src/fileManager.hpp
     src/fileManager.cpp
 )
+target_precompile_headers(image-analyze PRIVATE src/ImageAnalyzePCH.hpp)
 
-# PCH
-target_precompile_headers(ImageAnalyze PRIVATE src/ImageAnalyzePCH.hpp)
-
-# Warnings — cross-platform
 if (MSVC)
-    target_compile_options(ImageAnalyze PRIVATE
-        /W4
-        /permissive-
-        /external:W0
-    )
+    target_compile_options(image-analyze PRIVATE /W4 /permissive- /external:W0)
 else()
-    target_compile_options(ImageAnalyze PRIVATE
+    target_compile_options(image-analyze PRIVATE
         -Wall -Wextra -Wpedantic
         -Wshadow -Wconversion -Wsign-conversion
         -Wfloat-equal -Wcast-align -Wold-style-cast
@@ -41,49 +32,37 @@ else()
     )
 endif()
 
-# Link SFML 3 imported targets
-target_link_libraries(ImageAnalyze PRIVATE
-    SFML::Graphics
-    SFML::Window
-    SFML::System
-)
+target_link_libraries(image-analyze PRIVATE SFML::Graphics SFML::Window SFML::System)
 
-# ----- Runtime resource during build -----
-# Keep your existing behavior for in-tree runs
-configure_file(${CMAKE_SOURCE_DIR}/roboto.ttf
-               ${CMAKE_BINARY_DIR}/roboto.ttf
+# ---- Runtime resources (build-tree copy so you can run from build/) ----
+configure_file(${PROJECT_SOURCE_DIR}/roboto.ttf
+               ${PROJECT_BINARY_DIR}/roboto.ttf
                COPYONLY)
 
-# ----- Install rules -----
-# Install the executable to bin/
-install(TARGETS ImageAnalyze
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+# Allow packagers to customize where resources install. Defaults to /usr/share/image-analyze
+set(IMAGE_ANALYZE_DATA_DIR
+    "${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}"
+    CACHE PATH "Install-time data directory for image-analyze resources"
 )
 
-# Install the font
-install(FILES ${CMAKE_SOURCE_DIR}/roboto.ttf
-    DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME})
+# Build-time and install-time locations provided to the program
+target_compile_definitions(image-analyze PRIVATE
+    APP_BUILD_DATA_DIR="${PROJECT_BINARY_DIR}"
+    APP_INSTALLED_DATA_DIR="$<IF:$<BOOL:${CMAKE_INSTALL_FULL_DATADIR}>,${CMAKE_INSTALL_FULL_DATADIR},${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}>/image-analyze"
+)
 
-# ----- Enable IPO/LTO in Release if available -----
+# ---- Install rules ----
+install(TARGETS image-analyze
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}   # -> /usr/bin
+)
+
+install(FILES ${PROJECT_SOURCE_DIR}/roboto.ttf
+    DESTINATION ${IMAGE_ANALYZE_DATA_DIR}         # -> /usr/share/image-analyze
+)
+
+# ---- Enable IPO/LTO in Release if available ----
 include(CheckIPOSupported)
 check_ipo_supported(RESULT ipo_ok OUTPUT ipo_msg)
 if (ipo_ok)
-    set_property(TARGET ImageAnalyze PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+    set_property(TARGET image-analyze PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
 endif()
-
-# ----- Optional: 'uninstall' target -----
-# Allows:  make uninstall   (from the build dir)
-add_custom_target(uninstall
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
-)
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
-"if(NOT EXISTS \"${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt\")\n"
-"  message(FATAL_ERROR \"No install manifest\")\n"
-"endif()\n"
-"file(READ \"${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt\" files)\n"
-"string(REPLACE \"\\n\" \";\" files \"${files}\")\n"
-"foreach(file ${files})\n"
-"  message(STATUS \"Removing ${file}\")\n"
-"  file(REMOVE_RECURSE \"${file}\")\n"
-"endforeach()\n"
-)

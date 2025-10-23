@@ -10,7 +10,7 @@ int main(int argc, char* argv[]) {
     // Init
     std::string filepath;
     if (argc == 1) {
-        std::cout << "File path of image to load, or empty to load latest screenshot: ";
+        std::cout << "File path of image to load, or empty to load latest screenshot: " << std::flush;
         std::getline(std::cin, filepath);
         std::cout << "\n";
     }
@@ -18,7 +18,8 @@ int main(int argc, char* argv[]) {
         filepath = argv[1];
     }
 
-    std::filesystem::path imagePath;
+    namespace fs = std::filesystem;
+    fs::path imagePath;
 
     // If no filename specified, find the latest screenshot
     if (filepath.empty()) {
@@ -26,10 +27,10 @@ int main(int argc, char* argv[]) {
         imagePath = findLatestScreenshot(std::string(getenv("HOME")) + "/Pictures/Screenshots");
     }
     else {
-        imagePath = std::filesystem::path(filepath);
+        imagePath = fs::path(filepath);
     }
 
-    const std::filesystem::path& fontPath(std::string(getenv("HOME")) + "/projects/image-analyze/build/roboto.ttf");
+    std::cout << "Loading font " << std::string(fontPath) << std::endl;
     
     //Create render window
     sf::RenderWindow window = sf::RenderWindow(sf::VideoMode(sf::Vector2u(startingWidth, startingHeight)), "Image Analyzer", sf::Style::Resize | sf::Style::Close);
