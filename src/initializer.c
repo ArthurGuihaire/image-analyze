@@ -1,0 +1,56 @@
+#include <gl.h>
+#include <initializer.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+
+uint32_t windowWidth, windowHeight;
+
+void setWindowSize(int width, int height) {
+    windowWidth = width;
+    windowHeight = height;
+}
+
+void initGLFW(int majorVersion, int minorVersion) {
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, majorVersion);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minorVersion);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+}
+
+GLFWwindow* createWindow(bool fullscreen) {
+    GLFWwindow* window;
+    if (fullscreen) {
+        GLFWmonitor* mon = glfwGetPrimaryMonitor();
+        const GLFWvidmode* vidMode = glfwGetVideoMode(mon);
+        window = glfwCreateWindow(vidMode->width, vidMode->height, "OpenGL", mon, NULL);
+        windowWidth = vidMode->width;
+        windowHeight = vidMode->height;
+    }
+    else {
+        window = glfwCreateWindow(windowWidth, windowHeight, "OpenGL", NULL, NULL);
+    }
+    if (window == NULL)
+    {
+        fprintf(stderr, "Failed to create GLFW window\n");
+        glfwTerminate();
+        exit (2);
+    }
+    //Create an OpenGL contex for the window
+    glfwSwapInterval(1); //Limit framerate
+    glfwMakeContextCurrent(window);
+    return window;
+}
+
+void initGLAD() {
+    if (!gladLoadGL(glfwGetProcAddress))
+    {
+        fprintf(stderr, "Failed to initialize GLAD\n");
+        return;
+    }
+    glViewport(0, 0, windowWidth, windowHeight);
+}
+
+
+
+
