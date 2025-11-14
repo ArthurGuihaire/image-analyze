@@ -1,21 +1,19 @@
-#include <gl.h>
+#include <glad/gl.h>
 #include <initializer.h>
+#include <constants.h>
+#include <stb_image.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 
-uint32_t windowWidth, windowHeight;
-
-void setWindowSize(int width, int height) {
-    windowWidth = width;
-    windowHeight = height;
-}
+uint32_t windowWidth;
+uint32_t windowHeight;
 
 void initGLFW(int majorVersion, int minorVersion) {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, majorVersion);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minorVersion);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
 }
 
 GLFWwindow* createWindow(bool fullscreen) {
@@ -33,6 +31,7 @@ GLFWwindow* createWindow(bool fullscreen) {
     if (window == NULL)
     {
         fprintf(stderr, "Failed to create GLFW window\n");
+        printf("Width: %d, Height: %d\n", windowWidth, windowHeight);
         glfwTerminate();
         exit (2);
     }
@@ -43,14 +42,51 @@ GLFWwindow* createWindow(bool fullscreen) {
 }
 
 void initGLAD() {
-    if (!gladLoadGL(glfwGetProcAddress))
-    {
-        fprintf(stderr, "Failed to initialize GLAD\n");
-        return;
+    //if (!gladLoaderLoadGL(glfwGetProcAddress))
+    //{
+    //    fprintf(stderr, "Failed to initialize GLAD\n");
+    //    return;
+    //}
+    gladSetGLOnDemandLoader((GLADloadfunc)glfwGetProcAddress);
+    if (glGetString == NULL) {
+        fprintf(stderr, "Failed to load GL on-demand functions!\n");
+        exit(1);
     }
     glViewport(0, 0, windowWidth, windowHeight);
 }
 
+uint32_t loadTextureFramebuffer(const char* path, uint32_t* writeFramebuffer) {
+    int width, height, nrChannels;
+    stbi_set_flip_vertically_on_load(true);
+    printf("Path: %s\n", path);
+    unsigned char* data = stbi_load(path, &width, &height, &nrChannels, 0);
+    if (!data) {
+        fprintf(stderr, "Error: failed to load texture\n");
+        return 0;
+    }
 
+    GLenum format = (nrChannels == 3) ? GL_RGB : GL_RGBA;
 
+    uint32_t textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+
+    // Fix alignment for non-4-byte row size
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+
+    glGenFramebuffers(1, writeFramebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, *writeFramebuffer);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureID, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    stbi_image_free(data);
+    return textureID;
+}
 

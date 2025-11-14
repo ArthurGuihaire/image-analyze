@@ -1,7 +1,17 @@
+#pragma once
+#include <GLFW/glfw3.h>
 #include <stdint.h>
 typedef struct {
+    GLFWwindow* window;
     uint32_t textureId;
     uint32_t framebufferId;
-    uint32_t width;
-    uint32_t height;
+    float zoomFactor;
+    float xOffset, yOffset;
+    uint32_t framebufferWidth, framebufferHeight;
+    //stored bounding boxes
+    uint32_t screenCoords[4];
+    uint32_t fbCoords[4];
 } Renderer;
+Renderer initRenderer(const char* path);
+void loadImage(const char* path, Renderer* renderer);
+void render(Renderer* renderer);

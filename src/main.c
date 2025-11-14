@@ -1,5 +1,7 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <renderer.h>
+#include <inputHandler.h>
+#include <filemanager.h>
 
 int main(int argc, char* argv[]) {
     char* filepath;
@@ -9,18 +11,27 @@ int main(int argc, char* argv[]) {
     }
     else if (argc == 1) {
         fgets(buffer, 256, stdin);
+        if (buffer[0] == '\n') {
+            char expanded[256];
+            expandTilde("~/Pictures/Screenshots", expanded, 256);
+            int success = findLatestScreenshot(buffer, expanded);
+            if (success != 0) {
+                fprintf(stderr, "Failed to load %s\n", expanded);
+                return 2;
+            }
+        }
         filepath = buffer;
+        printf("%s\n", filepath);
     }
     else {
         fprintf(stderr, "Error: too many arguments\n");
         return 1;
     }
 
-    FILE* fp;
-    if ((fp = fopen(filepath, "r")) == NULL) {
-        fprintf(stderr, "Error: file %s cannot be opened\n", filepath);
-        return 2;
-    }
+    Renderer renderer = initRenderer(buffer);
+    initInput(&renderer);
 
-    
+    while (!glfwWindowShouldClose(renderer.window)) {
+        render(&renderer);
+    }
 }
