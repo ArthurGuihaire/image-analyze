@@ -1,1 +1,0 @@
-Use stb_image.h to load the image, get raw data, load to SDL surface, then (maybe) load that to a texture

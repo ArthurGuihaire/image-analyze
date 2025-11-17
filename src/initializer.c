@@ -17,15 +17,17 @@ void initGLFW(int majorVersion, int minorVersion) {
 }
 
 GLFWwindow* createWindow(bool fullscreen) {
+    GLFWmonitor* mon = glfwGetPrimaryMonitor();
+    const GLFWvidmode* vidMode = glfwGetVideoMode(mon);
     GLFWwindow* window;
+    window = glfwCreateWindow(vidMode->width, vidMode->height, "OpenGL", mon, NULL);
     if (fullscreen) {
-        GLFWmonitor* mon = glfwGetPrimaryMonitor();
-        const GLFWvidmode* vidMode = glfwGetVideoMode(mon);
-        window = glfwCreateWindow(vidMode->width, vidMode->height, "OpenGL", mon, NULL);
         windowWidth = vidMode->width;
         windowHeight = vidMode->height;
     }
     else {
+        windowWidth = (windowWidth > vidMode->width) ? vidMode->width : windowWidth;
+        windowHeight = (windowHeight > vidMode->height) ? vidMode->height : windowHeight;
         window = glfwCreateWindow(windowWidth, windowHeight, "OpenGL", NULL, NULL);
     }
     if (window == NULL)
@@ -55,16 +57,7 @@ void initGLAD() {
     glViewport(0, 0, windowWidth, windowHeight);
 }
 
-uint32_t loadTextureFramebuffer(const char* path, uint32_t* writeFramebuffer) {
-    int width, height, nrChannels;
-    stbi_set_flip_vertically_on_load(true);
-    printf("Path: %s\n", path);
-    unsigned char* data = stbi_load(path, &width, &height, &nrChannels, 0);
-    if (!data) {
-        fprintf(stderr, "Error: failed to load texture\n");
-        return 0;
-    }
-
+uint32_t loadTextureFramebuffer(unsigned char* data, uint32_t* writeFramebuffer, int width, int height, int nrChannels) {
     GLenum format = (nrChannels == 3) ? GL_RGB : GL_RGBA;
 
     uint32_t textureID;

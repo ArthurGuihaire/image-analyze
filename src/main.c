@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    Renderer renderer = initRenderer(buffer);
+    Renderer renderer = initRenderer(filepath);
     initInput(&renderer);
 
     while (!glfwWindowShouldClose(renderer.window)) {

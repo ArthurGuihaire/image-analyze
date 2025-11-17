@@ -13,5 +13,4 @@ typedef struct {
     uint32_t fbCoords[4];
 } Renderer;
 Renderer initRenderer(const char* path);
-void loadImage(const char* path, Renderer* renderer);
 void render(Renderer* renderer);
