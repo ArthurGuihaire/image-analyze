@@ -5,7 +5,7 @@
 #include <stb_image.h>
 #include <utils.h>
 #include <pthread.h>
-#include <time.h>
+//#include <time.h>
 
 typedef struct {
     const char* path;
@@ -15,18 +15,17 @@ typedef struct {
 } imageLoadArgs;
 
 void* loadImageThread(void* argStruct) {
-    clock_t start = clock();
+    //clock_t start = clock();
     imageLoadArgs* args = argStruct;
     stbi_set_flip_vertically_on_load(true);
-    printf("Path: %s\n", args->path);
     unsigned char* data = stbi_load(args->path, args->width, args->height, args->nrChannels, 0);
     if (!data) {
         fprintf(stderr, "Error: failed to load texture\n");
         return NULL;
     }
-    clock_t end = clock();
-    double ms = (double)(end-start) * 1000 / CLOCKS_PER_SEC;
-    printf("Loading the image (parallel with context creation) took %f ms\n", ms);
+    //clock_t end = clock();
+    //double ms = (double)(end-start) * 1000 / CLOCKS_PER_SEC;
+    //printf("Loading the image (parallel with context creation) took %f ms\n", ms);
     return data;
 }
 
@@ -37,13 +36,13 @@ Renderer initRenderer(const char* path) {
     imageLoadArgs args = {path, &fbWidth, &fbHeight, &nrChannels};
     pthread_create(&imgLoadThread, NULL, loadImageThread, &args);
  
-    clock_t start = clock();
+    //clock_t start = clock();
     initGLFW(3, 1);
-    clock_t end = clock();
-    double ms = (double)(end-start) * 1000 / CLOCKS_PER_SEC;
-    printf("InitGLFW took %f ms\n", ms);
+    //clock_t end = clock();
+    //double ms = (double)(end-start) * 1000 / CLOCKS_PER_SEC;
+    //printf("InitGLFW took %f ms\n", ms);
 
-    start = clock();
+    //start = clock();
     int imageWidth, imageHeight;
     {
         int channels;
@@ -53,22 +52,22 @@ Renderer initRenderer(const char* path) {
         windowWidth = imageWidth;
         windowHeight = imageHeight;
     }
-    end = clock();
-    ms = (double)(end-start) * 1000 / CLOCKS_PER_SEC;
-    printf("Image info took %f ms\n", ms);
+    //end = clock();
+    //ms = (double)(end-start) * 1000 / CLOCKS_PER_SEC;
+    //printf("Image info took %f ms\n", ms);
 
-    start = clock();
+    //start = clock();
     GLFWwindow* window = createWindow(false);
-    end = clock();
-    ms = (double)(end-start) * 1000 / CLOCKS_PER_SEC;
-    printf("Context and Window creation took %f ms\n", ms);
-    start = clock();
+    //end = clock();
+    //ms = (double)(end-start) * 1000 / CLOCKS_PER_SEC;
+    //printf("Context and Window creation took %f ms\n", ms);
+    //start = clock();
     initGLAD(); 
-    end = clock();
-    ms = (double)(end-start) * 1000 / CLOCKS_PER_SEC;
-    printf("Loading GLAD took %f ms\n", ms);
+    //end = clock();
+    //ms = (double)(end-start) * 1000 / CLOCKS_PER_SEC;
+    //printf("Loading GLAD took %f ms\n", ms);
 
-    start = clock();
+    //start = clock();
     Renderer renderer = {
         window, 0, 0, 1.0f, 0.0f, 0.0f, imageWidth, imageHeight, {0, 0, windowWidth, windowHeight}, {0, 0, windowWidth, windowHeight}
     };
@@ -84,9 +83,9 @@ Renderer initRenderer(const char* path) {
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, renderer.framebufferId);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    end = clock();
-    ms = (double)(end-start) * 1000 / CLOCKS_PER_SEC;
-    printf("End took %f ms\n", ms);
+    //end = clock();
+    //ms = (double)(end-start) * 1000 / CLOCKS_PER_SEC;
+    //printf("End took %f ms\n", ms);
 
     return renderer;
 }

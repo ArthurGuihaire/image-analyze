@@ -11,6 +11,7 @@ uint32_t windowHeight;
 
 void initGLFW(int majorVersion, int minorVersion) {
     glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WAYLAND);
+    //glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
     glfwInitHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, majorVersion);

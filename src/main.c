@@ -21,7 +21,6 @@ int main(int argc, char* argv[]) {
             }
         }
         filepath = buffer;
-        printf("%s\n", filepath);
     }
     else {
         fprintf(stderr, "Error: too many arguments\n");
@@ -31,7 +30,8 @@ int main(int argc, char* argv[]) {
     Renderer renderer = initRenderer(filepath);
     initInput(&renderer);
 
+    render(&renderer);
     while (!glfwWindowShouldClose(renderer.window)) {
-        render(&renderer);
+        glfwWaitEvents();
     }
 }

@@ -35,6 +35,7 @@ void scrollCallback(GLFWwindow* window, double xOffset, double yOffset) {
     updateCoords(renderer);
     //printf("Offset: (%d, %d)\n", renderer->xOffset, renderer->yOffset);
     //printf("Bottom left: (%d, %d), Zoom offset: (%f, %f), Mouse offset: (%d, %d), diff: (%d, %d)\n", bottomLeftX, bottomLeftY, mousePosX, mousePosY, mouseOffsetX, mouseOffsetY, zoomOffsetDiffX, zoomOffsetDiffY);
+    render(renderer);
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -47,6 +48,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     Renderer* renderer = ptr->renderer;
 
     updateCoords(renderer);
+    render(renderer);
 }
 
 void mousePositionCallback(GLFWwindow* window, double xPos, double yPos) {
@@ -59,6 +61,7 @@ void mousePositionCallback(GLFWwindow* window, double xPos, double yPos) {
         renderer->yOffset -= yPos - ptr->mouseY;
 
         updateCoords(renderer);
+        render(renderer);
     }
     ptr->mouseX = xPos;
     ptr->mouseY = yPos;
