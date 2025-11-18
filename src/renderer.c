@@ -15,6 +15,7 @@ typedef struct {
 } imageLoadArgs;
 
 void* loadImageThread(void* argStruct) {
+    clock_t start = clock();
     imageLoadArgs* args = argStruct;
     stbi_set_flip_vertically_on_load(true);
     printf("Path: %s\n", args->path);
@@ -23,10 +24,19 @@ void* loadImageThread(void* argStruct) {
         fprintf(stderr, "Error: failed to load texture\n");
         return NULL;
     }
+    clock_t end = clock();
+    double ms = (double)(end-start) * 1000 / CLOCKS_PER_SEC;
+    printf("Loading the image (parallel with context creation) took %f ms\n", ms);
     return data;
 }
 
 Renderer initRenderer(const char* path) {
+    //Start decoding image in parallel with opengl init stuff
+    pthread_t imgLoadThread;
+    int fbWidth, fbHeight, nrChannels;
+    imageLoadArgs args = {path, &fbWidth, &fbHeight, &nrChannels};
+    pthread_create(&imgLoadThread, NULL, loadImageThread, &args);
+ 
     clock_t start = clock();
     initGLFW(3, 1);
     clock_t end = clock();
@@ -48,20 +58,15 @@ Renderer initRenderer(const char* path) {
     printf("Image info took %f ms\n", ms);
 
     start = clock();
-    pthread_t imgLoadThread;
-    int fbWidth, fbHeight, nrChannels;
-    imageLoadArgs args = {path, &fbWidth, &fbHeight, &nrChannels};
-    pthread_create(&imgLoadThread, NULL, loadImageThread, &args);
+    GLFWwindow* window = createWindow(false);
     end = clock();
     ms = (double)(end-start) * 1000 / CLOCKS_PER_SEC;
-    printf("Thread took %f ms\n", ms);
-
+    printf("Context and Window creation took %f ms\n", ms);
     start = clock();
-    GLFWwindow* window = createWindow(false);
     initGLAD(); 
     end = clock();
     ms = (double)(end-start) * 1000 / CLOCKS_PER_SEC;
-    printf("Context and GLAD took %f ms\n", ms);
+    printf("Loading GLAD took %f ms\n", ms);
 
     start = clock();
     Renderer renderer = {
