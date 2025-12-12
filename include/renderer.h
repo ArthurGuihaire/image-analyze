@@ -1,5 +1,6 @@
 #pragma once
 #include <GLFW/glfw3.h>
+#include <stdbool.h>
 #include <stdint.h>
 typedef struct {
     GLFWwindow* window;
@@ -11,6 +12,7 @@ typedef struct {
     //stored bounding boxes
     uint32_t screenCoords[4];
     uint32_t fbCoords[4];
+    bool stateChanged;
 } Renderer;
 Renderer initRenderer(const char* path);
 void render(Renderer* renderer);

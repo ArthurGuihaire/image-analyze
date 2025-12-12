@@ -62,7 +62,7 @@ void initGLAD() {
 
 uint32_t loadTextureFramebuffer(unsigned char* data, uint32_t* writeFramebuffer, int width, int height, int nrChannels) {
     GLenum format = (nrChannels == 3) ? GL_RGB : GL_RGBA;
-
+    
     uint32_t textureID;
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);

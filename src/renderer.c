@@ -49,8 +49,8 @@ Renderer initRenderer(const char* path) {
         stbi_info(path, &imageWidth, &imageHeight, &channels);
         printf("Loading %s\n", path);
         printf("Detected image dimensions imageWidth=%d imageHeight=%d\n", imageWidth, imageHeight);
-        windowWidth = imageWidth;
-        windowHeight = imageHeight;
+        windowWidth = imageWidth * 2;
+        windowHeight = imageHeight * 2;
     }
     //end = clock();
     //ms = (double)(end-start) * 1000 / CLOCKS_PER_SEC;
@@ -69,11 +69,15 @@ Renderer initRenderer(const char* path) {
 
     //start = clock();
     Renderer renderer = {
-        window, 0, 0, 1.0f, 0.0f, 0.0f, imageWidth, imageHeight, {0, 0, windowWidth, windowHeight}, {0, 0, windowWidth, windowHeight}
+        window, 0, 0, 1.0f, 0.0f, 0.0f, imageWidth, imageHeight, {0, 0, windowWidth, windowHeight}, {0, 0, windowWidth, windowHeight}, false
     };
 
     unsigned char* data;
     pthread_join(imgLoadThread, (void**)&data);
+
+    if (data == NULL) {
+        exit(3);
+    }
 
     renderer.textureId = loadTextureFramebuffer(data, &(renderer.framebufferId), fbWidth, fbHeight, nrChannels);
     if (!(renderer.textureId)) {
@@ -97,6 +101,5 @@ void render(Renderer* renderer) {
     glBlitFramebuffer(renderer->fbCoords[0], renderer->fbCoords[1], renderer->fbCoords[2], renderer->fbCoords[3], renderer->screenCoords[0], renderer->screenCoords[1], renderer->screenCoords[2], renderer->screenCoords[3], GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
     glfwSwapBuffers(renderer->window);
-    glfwPollEvents();
 }
 

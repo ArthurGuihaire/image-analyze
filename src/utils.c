@@ -1,6 +1,7 @@
 #include <utils.h>
 #include <stdint.h>
 #include <constants.h>
+#include <stdio.h>
 
 float min(float a, float b) {
     return (a<b) ? a : b;

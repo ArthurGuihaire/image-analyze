@@ -8,3 +8,4 @@ typedef struct {
 } userPointer;
 
 void initInput(Renderer* renderer);
+void updateCoords(Renderer* renderer);

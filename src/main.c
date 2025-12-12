@@ -33,5 +33,9 @@ int main(int argc, char* argv[]) {
     render(&renderer);
     while (!glfwWindowShouldClose(renderer.window)) {
         glfwWaitEvents();
+        if (renderer.stateChanged) {
+            updateCoords(&renderer);
+            render(&renderer);
+        }
     }
 }
