@@ -23,8 +23,8 @@ GLFWwindow* createWindow(bool fullscreen) {
     GLFWmonitor* mon = glfwGetPrimaryMonitor();
     const GLFWvidmode* vidMode = glfwGetVideoMode(mon);
     GLFWwindow* window;
-    window = glfwCreateWindow(vidMode->width, vidMode->height, "OpenGL", mon, NULL);
     if (fullscreen) {
+        window = glfwCreateWindow(vidMode->width, vidMode->height, "OpenGL", mon, NULL);
         windowWidth = vidMode->width;
         windowHeight = vidMode->height;
     }
@@ -62,7 +62,7 @@ void initGLAD() {
 
 uint32_t loadTextureFramebuffer(unsigned char* data, uint32_t* writeFramebuffer, int width, int height, int nrChannels) {
     GLenum format = (nrChannels == 3) ? GL_RGB : GL_RGBA;
-    
+
     uint32_t textureID;
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
@@ -85,4 +85,3 @@ uint32_t loadTextureFramebuffer(unsigned char* data, uint32_t* writeFramebuffer,
     stbi_image_free(data);
     return textureID;
 }
-

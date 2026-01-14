@@ -35,7 +35,7 @@ Renderer initRenderer(const char* path) {
     int fbWidth, fbHeight, nrChannels;
     imageLoadArgs args = {path, &fbWidth, &fbHeight, &nrChannels};
     pthread_create(&imgLoadThread, NULL, loadImageThread, &args);
- 
+
     //clock_t start = clock();
     initGLFW(3, 1);
     //clock_t end = clock();
@@ -49,8 +49,8 @@ Renderer initRenderer(const char* path) {
         stbi_info(path, &imageWidth, &imageHeight, &channels);
         printf("Loading %s\n", path);
         printf("Detected image dimensions imageWidth=%d imageHeight=%d\n", imageWidth, imageHeight);
-        windowWidth = imageWidth * 2;
-        windowHeight = imageHeight * 2;
+        windowWidth = imageWidth;
+        windowHeight = imageHeight;
     }
     //end = clock();
     //ms = (double)(end-start) * 1000 / CLOCKS_PER_SEC;
@@ -62,7 +62,7 @@ Renderer initRenderer(const char* path) {
     //ms = (double)(end-start) * 1000 / CLOCKS_PER_SEC;
     //printf("Context and Window creation took %f ms\n", ms);
     //start = clock();
-    initGLAD(); 
+    initGLAD();
     //end = clock();
     //ms = (double)(end-start) * 1000 / CLOCKS_PER_SEC;
     //printf("Loading GLAD took %f ms\n", ms);
@@ -102,4 +102,3 @@ void render(Renderer* renderer) {
 
     glfwSwapBuffers(renderer->window);
 }
-
