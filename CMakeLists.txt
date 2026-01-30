@@ -7,6 +7,10 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_link_options(-fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer)
 endif()
 
+if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm")
+    add_compile_definitions(STBI_NEON)
+endif()
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffunction-sections -fdata-sections")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--gc-sections")
 
